@@ -1337,6 +1337,204 @@ Data processing instructions in ARM are used to perform arithmetic, logical, mov
 
 ---
 
-# 💬 Viva Answer
+![alt text](image-1.png)
+# Barrel Shifter in ARM – Exam Ready Notes
 
-Data processing instructions in ARM operate on data stored in registers. They include arithmetic instructions such as ADD and SUB, logical instructions such as AND and ORR, move instructions such as MOV and MVN, and comparison instructions such as CMP, CMN, TST, and TEQ. These instructions do not directly affect memory and may update condition flags when required.
+---
+
+## 🔹 1. Introduction
+
+The **barrel shifter** is a special hardware unit in the ARM processor that allows shifting or rotating of data bits efficiently.
+
+It is mainly used in **data processing instructions** where the **second operand (Operand2)** can be modified before being used by the ALU.
+
+---
+
+## 🔹 2. Key Concept
+
+In ARM instructions:
+
+* Operand1 → directly goes to ALU
+* Operand2 → passes through **barrel shifter** → then goes to ALU
+
+---
+
+## 🔹 3. Advantage of Barrel Shifter
+
+* Allows **shift + operation in a single instruction**
+* Improves performance
+* Reduces number of instructions
+
+### Example:
+
+```asm
+ADD R0, R1, R2, LSL #2
+```
+
+Meaning:
+
+```asm
+R0 = R1 + (R2 << 2)
+```
+
+---
+
+## 🔹 4. Types of Shift Operations
+
+---
+
+### ✅ 1. LSL (Logical Shift Left)
+
+```asm
+Rm, LSL #n
+```
+
+* Shifts bits to the left
+* Zeros are filled on the right
+
+📌 Equivalent to multiplication by 2^n
+
+Example:
+
+```
+5 (00000101) → LSL #1 → 10 (00001010)
+```
+
+---
+
+### ✅ 2. LSR (Logical Shift Right)
+
+```asm
+Rm, LSR #n
+```
+
+* Shifts bits to the right
+* Zeros are filled on the left
+
+📌 Used for unsigned division by 2
+
+Example:
+
+```
+8 (00001000) → LSR #1 → 4 (00000100)
+```
+
+---
+
+### ✅ 3. ASR (Arithmetic Shift Right)
+
+```asm
+Rm, ASR #n
+```
+
+* Shifts bits to the right
+* Sign bit (MSB) is preserved
+
+📌 Used for signed numbers
+
+---
+
+### ✅ 4. ROR (Rotate Right)
+
+```asm
+Rm, ROR #n
+```
+
+* Bits shifted right
+* Bits falling off re-enter from left
+
+---
+
+### ✅ 5. RRX (Rotate Right Extended)
+
+```asm
+Rm, RRX
+```
+
+* Rotate right by 1 bit using **Carry flag**
+
+---
+
+## 🔹 5. Shift Amount Specification
+
+Shift amount can be specified in two ways:
+
+---
+
+### 🔸 1. Immediate Shift
+
+```asm
+ADD R0, R1, R2, LSL #2
+```
+
+* Shift value is constant
+
+---
+
+### 🔸 2. Register Shift
+
+```asm
+ADD R0, R1, R2, LSL R3
+```
+
+* Shift value is stored in register R3
+
+---
+
+## 🔹 6. General Syntax
+
+```asm
+<Instruction> Rd, Rn, Rm, <shift> #amount
+```
+
+Example:
+
+```asm
+ADD R0, R1, R2, LSL #2
+```
+
+---
+
+## 🔹 7. Example with Logical Instruction
+
+```asm
+AND R0, R1, R2, LSR #1
+```
+
+Meaning:
+
+```asm
+R0 = R1 AND (R2 >> 1)
+```
+
+---
+
+## 🔹 8. Carry Flag and Shifting
+
+* When shifting occurs, the bit that is shifted out can be stored in the **Carry flag**
+* If instruction has `S`, flags are updated
+
+Example:
+
+```asm
+MOVS R0, R1, LSL #1
+```
+
+---
+
+## 🔹 9. Key Points for Exam
+
+* Barrel shifter modifies Operand2 before ALU operation
+* Supports shift and rotate operations
+* Improves efficiency by combining operations
+* Used in arithmetic and logical instructions
+
+---
+
+## 🔹 10. Exam Summary
+
+The barrel shifter in ARM allows the second operand to be shifted or rotated before being used in data processing instructions. It supports operations such as LSL, LSR, ASR, ROR, and RRX. This feature improves performance by combining shift and arithmetic operations in a single instruction.
+
+---
+
+
