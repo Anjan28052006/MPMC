@@ -4437,74 +4437,97 @@ The SWI instruction in ARM is used to generate a software interrupt that transfe
 
 ## 🔹 1. Introduction
 
-The **Program Status Register (PSR)** in ARM stores important information about the processor state.
-
-There are two types:
-
-* **CPSR (Current Program Status Register)**
-* **SPSR (Saved Program Status Register)**
-
-👉 PSR contains:
+The **Program Status Register (PSR)** is one of the most important registers in ARM architecture. It stores the **current state of the processor**, including:
 
 * Condition flags
-* Processor mode
-* Interrupt control bits
 * Execution state (ARM/Thumb)
+* Interrupt status
+* Processor mode
 
 ---
 
-## 🔹 2. CPSR vs SPSR
+## 🔹 2. Types of PSR
 
-| Register | Purpose                               |
-| -------- | ------------------------------------- |
-| CPSR     | Holds current processor state         |
-| SPSR     | Stores previous CPSR during exception |
+### ✅ 1. CPSR (Current Program Status Register)
 
----
+* Holds **current processor state**
 
-## 🔹 3. Fields in CPSR (VERY IMPORTANT)
+### ✅ 2. SPSR (Saved Program Status Register)
 
-| Field     | Meaning                          |
-| --------- | -------------------------------- |
-| N         | Negative flag                    |
-| Z         | Zero flag                        |
-| C         | Carry flag                       |
-| V         | Overflow flag                    |
-| I         | IRQ disable                      |
-| F         | FIQ disable                      |
-| T         | Thumb state bit                  |
-| Mode bits | Processor mode (User, SVC, etc.) |
+* Holds **previous CPSR value during exceptions**
+
+👉 Used when returning from interrupts/exceptions
 
 ---
 
-## 🔹 4. Instructions to Access PSR
+## 🔹 3. Structure of CPSR (VERY IMPORTANT 🔥)
+
+CPSR is a 32-bit register divided into fields:
+
+### 📌 Fields
+
+| Bits  | Field     | Meaning           |
+| ----- | --------- | ----------------- |
+| 31–28 | Flags     | N, Z, C, V        |
+| 27–24 | Status    | Reserved / status |
+| 23–16 | Extension | Future use        |
+| 15–8  | Reserved  | —                 |
+| 7     | I         | IRQ disable       |
+| 6     | F         | FIQ disable       |
+| 5     | T         | Thumb state       |
+| 4–0   | Mode      | Processor mode    |
+
+---
+
+## 🔹 4. Condition Flags (NZCV)
+
+| Flag | Meaning         |
+| ---- | --------------- |
+| N    | Negative result |
+| Z    | Zero result     |
+| C    | Carry / borrow  |
+| V    | Overflow        |
+
+👉 Used for conditional execution
+
+---
+
+## 🔹 5. Control Bits (VERY IMPORTANT)
+
+| Bit  | Meaning                         |
+| ---- | ------------------------------- |
+| I    | Disable IRQ interrupt           |
+| F    | Disable FIQ interrupt           |
+| T    | 0 = ARM, 1 = Thumb              |
+| Mode | CPU mode (User, SVC, IRQ, etc.) |
+
+---
+
+## 🔹 6. Instructions to Access PSR
 
 ARM provides two instructions:
 
-* **MRS (Move PSR to Register)**
-* **MSR (Move Register to PSR)**
-
 ---
 
-## 🔸 4.1 MRS Instruction
+## 🔸 6.1 MRS – Move PSR to Register
 
 ### 📌 Syntax
 
 ```asm
-MRS Rd, CPSR
-MRS Rd, SPSR
+MRS{cond} Rd, CPSR
+MRS{cond} Rd, SPSR
 ```
 
 ### 📌 Operation
 
 ```asm
-Rd = CPSR or SPSR
+Rd = CPSR / SPSR
 ```
 
-### 📌 Explanation
+### 📌 Use
 
-* Copies PSR contents into a general-purpose register
-* Used to read flags or mode
+* Read flags
+* Check processor state
 
 ### 📌 Example
 
@@ -4514,74 +4537,494 @@ MRS R0, CPSR
 
 ---
 
-## 🔸 4.2 MSR Instruction
+## 🔸 6.2 MSR – Move Register to PSR
 
 ### 📌 Syntax
 
 ```asm
-MSR CPSR, Rm
-MSR SPSR, Rm
+MSR{cond} CPSR_<fields>, Rm
+MSR{cond} SPSR_<fields>, Rm
+MSR{cond} CPSR_<fields>, #immediate
 ```
+
+---
 
 ### 📌 Operation
 
 ```asm
-CPSR or SPSR = Rm
+PSR[field] = Rm OR immediate
 ```
 
-### 📌 Explanation
+---
 
-* Writes register value into PSR
-* Used to change flags, mode, or control bits
+## 🔹 7. Field Selection (VERY IMPORTANT 🔥)
+
+You **do not overwrite entire PSR always**.
+
+You specify fields:
+
+| Field | Meaning                 |
+| ----- | ----------------------- |
+| _f    | Flags (NZCV)            |
+| _c    | Control (mode, I, F, T) |
+| _x    | Extension               |
+| _s    | Status                  |
+
+---
 
 ### 📌 Example
 
 ```asm
-MSR CPSR, R0
+MSR CPSR_f, R0
 ```
 
----
+👉 Only flags updated
 
-## 🔹 5. Important Note (VERY IMPORTANT)
+```asm
+MSR CPSR_c, R0
+```
 
-* Not all bits of CPSR can be modified in user mode
-* Only privileged modes can modify control fields
-
----
-
-## 🔹 6. Use Cases
-
-* Checking condition flags
-* Switching processor modes
-* Enabling/disabling interrupts
-* Saving/restoring processor state
+👉 Control bits updated
 
 ---
 
-## 🔹 7. Example Flow
+## 🔹 8. Immediate Write Example
+
+```asm
+MSR CPSR_c, #0x80
+```
+
+👉 Used to modify interrupt bits etc.
+
+---
+
+## 🔹 9. Example Flow (IMPORTANT)
 
 ```asm
 MRS R0, CPSR
-ORR R0, R0, #0x80   ; disable IRQ
-MSR CPSR, R0
+ORR R0, R0, #0x80   ; set I bit
+MSR CPSR_c, R0
 ```
+
+👉 Disables IRQ interrupt
 
 ---
 
-## 🔹 8. Key Points for Exam
+## 🔹 10. Privilege Restriction (VERY IMPORTANT)
 
-* CPSR holds current state
-* SPSR holds saved state during exception
+* User mode **cannot modify control bits**
+* Only privileged modes (SVC, IRQ, etc.) can
+
+---
+
+## 🔹 11. Use Cases
+
+* Interrupt control
+* Mode switching
+* Reading flags
+* Exception handling
+
+---
+
+## 🔹 12. Key Points for Exam
+
+* CPSR = current state
+* SPSR = saved state
 * MRS reads PSR
 * MSR writes PSR
-* Contains flags (NZCV) and control bits
+* Fields must be specified (_f, _c etc.)
+* Contains NZCV flags and control bits
 
 ---
 
-## 🔹 9. Exam-Ready Summary
+## 🔹 13. Exam-Ready Summary
 
-Program Status Register instructions in ARM include MRS and MSR. MRS transfers the contents of CPSR or SPSR into a general-purpose register, while MSR writes data from a register into CPSR or SPSR. These instructions are used to control processor state and flags.
+The Program Status Register (PSR) in ARM contains information about the processor state, including flags, execution mode, and interrupt control bits. The MRS instruction is used to transfer the contents of CPSR or SPSR into a register, while the MSR instruction transfers data from a register or immediate value into selected fields of CPSR or SPSR. These instructions are essential for controlling processor behavior.
+
+---
+
+![alt text](image-14.png)
+![alt text](image-15.png)
+
+# ARM Coprocessor Instructions – Detailed Exam Notes
+
+---
+
+## 🔹 1. Introduction
+
+A **coprocessor** is a specialized hardware unit that works alongside the ARM CPU to perform specific tasks more efficiently.
+
+👉 Typical roles:
+
+* Floating-point computations (FPU)
+* System control (cache, MMU)
+* Signal processing
+
+👉 Benefit: Offloads complex tasks from the main CPU → improves performance.
+
+---
+
+## 🔹 2. What Coprocessor Instructions Do
+
+ARM provides instructions to:
+
+* Perform operations inside the coprocessor
+* Transfer data between ARM CPU and coprocessor
+* Transfer data between memory and coprocessor
+
+---
+
+## 🔹 3. Types of Coprocessor Instructions
+
+### ✅ 1. CDP – Coprocessor Data Processing
+
+### ✅ 2. MRC / MCR – Register Transfer
+
+### ✅ 3. LDC / STC – Memory Transfer
+
+---
+
+## 🔹 4. CDP – Coprocessor Data Processing
+
+### 📌 Syntax
+
+```asm
+CDP{cond} cp, opcode1, Cd, Cn {, opcode2}
+```
+
+### 📌 Meaning
+
+* Performs an operation **inside the coprocessor**
+* Does NOT transfer data to ARM registers directly
+
+### 📌 Components
+
+| Field           | Meaning               |
+| --------------- | --------------------- |
+| cp              | Coprocessor number    |
+| opcode1/opcode2 | Operation selector    |
+| Cn, Cd          | Coprocessor registers |
+
+### 📌 Example (Conceptual)
+
+```asm
+CDP p1, 0, c1, c2, 0
+```
+
+👉 Perform operation using coprocessor registers
+
+---
+
+## 🔹 5. MRC / MCR – Register Transfer
+
+---
+
+### 🔸 MRC – Move from Coprocessor to ARM
+
+### 📌 Syntax
+
+```asm
+MRC{cond} cp, opcode1, Rd, Cn, Cm {, opcode2}
+```
+
+### 📌 Operation
+
+```asm
+Rd = coprocessor register value
+```
+
+### 📌 Example
+
+```asm
+MRC p15, 0, R0, c1, c0, 0
+```
+
+👉 Read system control register into R0
+
+---
+
+### 🔸 MCR – Move from ARM to Coprocessor
+
+### 📌 Syntax
+
+```asm
+MCR{cond} cp, opcode1, Rd, Cn, Cm {, opcode2}
+```
+
+### 📌 Operation
+
+```asm
+coprocessor register = Rd
+```
+
+### 📌 Example
+
+```asm
+MCR p15, 0, R0, c1, c0, 0
+```
+
+👉 Write R0 into system control register
+
+---
+
+## 🔹 6. LDC / STC – Memory Transfer
+
+---
+
+### 🔸 LDC – Load to Coprocessor
+
+### 📌 Syntax
+
+```asm
+LDC{cond} cp, Cd, addressing
+```
+
+### 📌 Operation
+
+```asm
+Load memory data into coprocessor registers
+```
+
+---
+
+### 🔸 STC – Store from Coprocessor
+
+### 📌 Syntax
+
+```asm
+STC{cond} cp, Cd, addressing
+```
+
+### 📌 Operation
+
+```asm
+Store coprocessor data into memory
+```
+
+---
+
+## 🔹 7. Coprocessor Number (IMPORTANT)
+
+* Identifies which coprocessor is used
+
+Examples:
+
+* p10, p11 → Floating point
+* p15 → System control (cache, MMU)
+
+---
+
+## 🔹 8. Key Differences Between Instructions
+
+| Instruction | Purpose                              |
+| ----------- | ------------------------------------ |
+| CDP         | Perform operation inside coprocessor |
+| MRC         | Read from coprocessor to ARM         |
+| MCR         | Write from ARM to coprocessor        |
+| LDC         | Load from memory to coprocessor      |
+| STC         | Store from coprocessor to memory     |
+
+---
+
+## 🔹 9. Use Cases
+
+* Floating point operations
+* Cache control
+* Memory management unit (MMU)
+* System configuration
+
+---
+
+## 🔹 10. Key Points for Exam
+
+* Coprocessor improves performance
+* CDP → internal processing
+* MRC/MCR → register transfer
+* LDC/STC → memory transfer
+* Uses coprocessor-specific registers
+
+---
+
+## 🔹 11. Exam-Ready Summary
+
+Coprocessor instructions in ARM are used to perform specialized operations using additional hardware units. CDP performs operations inside the coprocessor, MRC and MCR transfer data between ARM and coprocessor registers, and LDC/STC transfer data between memory and the coprocessor. These instructions enhance performance by offloading complex tasks from the main processor.
 
 ---
 
 
+![alt text](image-16.png)
+
+# ARM Loading Constants – Detailed Exam Notes
+
+---
+
+## 🔹 1. Introduction
+
+In ARM, there is **no direct instruction to load a full 32-bit constant** into a register.
+
+👉 Reason:
+
+* ARM instructions are 32-bit in size
+* Part of instruction is used for opcode, registers, etc.
+* So full 32-bit constant cannot fit directly
+
+---
+
+## 🔹 2. Problem Statement
+
+👉 You cannot do:
+
+```asm
+MOV R0, #0x12345678   ; NOT possible directly
+```
+
+---
+
+## 🔹 3. Solution: Pseudo Instructions
+
+ARM provides **pseudo-instructions** (handled by assembler):
+
+* **LDR Rd, =constant**
+* **ADR Rd, label**
+
+---
+
+## 🔹 4. LDR Pseudo Instruction
+
+### 📌 Syntax
+
+```asm
+LDR Rd, =constant
+```
+
+### 📌 Meaning
+
+```asm
+Rd = 32-bit constant
+```
+
+---
+
+### 📌 How it Works (VERY IMPORTANT 🔥)
+
+Assembler converts it into:
+
+👉 Case 1: Small constant
+
+```asm
+MOV Rd, #value
+```
+
+👉 Case 2: Large constant
+
+```asm
+LDR Rd, [PC, offset]
+```
+
+👉 Constant is stored in **literal pool (memory)**
+
+---
+
+### 📌 Example
+
+```asm
+LDR R0, =0x12345678
+```
+
+👉 Internally:
+
+* Constant stored in memory
+* Loaded using PC-relative addressing
+
+---
+
+## 🔹 5. Literal Pool (IMPORTANT)
+
+* A memory area where constants are stored
+* Located near code
+* Accessed using PC-relative addressing
+
+---
+
+## 🔹 6. ADR Instruction
+
+### 📌 Syntax
+
+```asm
+ADR Rd, label
+```
+
+### 📌 Meaning
+
+```asm
+Rd = address of label
+```
+
+---
+
+### 📌 Explanation
+
+* Loads address (not value)
+* Uses PC-relative calculation
+
+---
+
+### 📌 Example
+
+```asm
+ADR R0, LOOP
+```
+
+👉 R0 = address of LOOP
+
+---
+
+## 🔹 7. Difference Between LDR and ADR
+
+| Feature     | LDR           | ADR           |
+| ----------- | ------------- | ------------- |
+| Purpose     | Load constant | Load address  |
+| Uses memory | Yes           | No            |
+| Range       | Large values  | Limited range |
+
+---
+
+## 🔹 8. Important Points
+
+* LDR = pseudo instruction
+* Actual implementation may differ
+* Uses PC-relative addressing
+* ADR is faster (no memory access)
+
+---
+
+## 🔹 9. Example Flow
+
+```asm
+LDR R0, =100
+ADR R1, LABEL
+```
+
+* R0 gets value 100
+* R1 gets address of LABEL
+
+---
+
+## 🔹 10. Key Points for Exam
+
+* No direct 32-bit constant load
+* LDR used for constants
+* ADR used for addresses
+* Literal pool stores constants
+
+---
+
+## 🔹 11. Exam-Ready Summary
+
+ARM does not support direct loading of 32-bit constants into registers. Instead, pseudo-instructions like LDR and ADR are used. LDR loads constants from memory using PC-relative addressing, while ADR loads the address of a label. These techniques allow efficient handling of large constants in ARM programs.
+
+---
+
+## 💬 Viva Answer
+
+ARM uses LDR pseudo-instruction to load constants and ADR to load addresses because it cannot directly encode 32-bit constants in instructions.
