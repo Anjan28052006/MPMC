@@ -3253,5 +3253,698 @@ BLT label
 Branch instructions in ARM are used to alter program flow by modifying the program counter. B performs simple branching, BL is used for function calls by saving the return address in LR, BX is used for branching with state switching, and BLX combines function calling with state switching.
 
 ---
+![alt text](image-6.png)
+# ARM Load-Store Instructions (Single Register Transfer) – Detailed Exam Notes
+
+---
+
+## 🔹 1. Introduction
+
+ARM follows a **Load/Store architecture**, which means:
+
+👉 Data can only be transferred between **memory and registers** using special instructions:
+
+* **LDR (Load Register)**
+* **STR (Store Register)**
+
+Other instructions (ADD, SUB, etc.) **cannot directly access memory**.
+
+---
+
+## 🔹 2. Single Register Transfer
+
+Single register transfer instructions are used to:
+
+* Load data from memory into a register
+* Store data from a register into memory
+
+---
+
+## 🔹 3. Types of Load and Store Instructions
+
+### 🔸 1. Word Transfer (32-bit)
+
+| Instruction | Meaning                      |
+| ----------- | ---------------------------- |
+| LDR         | Load 32-bit word from memory |
+| STR         | Store 32-bit word to memory  |
+
+---
+
+### 🔸 2. Byte Transfer (8-bit)
+
+| Instruction | Meaning          |
+| ----------- | ---------------- |
+| LDRB        | Load 8-bit byte  |
+| STRB        | Store 8-bit byte |
+
+---
+
+### 🔸 3. Halfword Transfer (16-bit)
+
+| Instruction | Meaning               |
+| ----------- | --------------------- |
+| LDRH        | Load 16-bit halfword  |
+| STRH        | Store 16-bit halfword |
+
+---
+
+### 🔸 4. Signed Data Transfer (IMPORTANT)
+
+| Instruction | Meaning                       |
+| ----------- | ----------------------------- |
+| LDRSB       | Load signed byte (8-bit)      |
+| LDRSH       | Load signed halfword (16-bit) |
+
+👉 These extend the sign to 32-bit
+
+---
+
+## 🔹 4. Memory Access Sizes
+
+ARM supports different memory sizes:
+
+| Size   | Bits    | Name     |
+| ------ | ------- | -------- |
+| 8-bit  | 1 byte  | Byte     |
+| 16-bit | 2 bytes | Halfword |
+| 32-bit | 4 bytes | Word     |
+
+👉 Memory system must support all these sizes.
+
+---
+
+## 🔹 5. General Syntax
+
+### 📌 Load Instruction
+
+```asm
+LDR{cond}{size} Rd, address
+```
+
+### 📌 Store Instruction
+
+```asm
+STR{cond}{size} Rd, address
+```
+
+---
+
+## 🔹 6. Addressing Concept
+
+Address is usually given as:
+
+```asm
+[Rn]
+```
+
+Meaning:
+
+* Rn contains memory address
+
+---
+
+## 🔹 7. Examples
+
+---
+
+### ✅ Example 1: Load Word
+
+```asm
+LDR R0, [R1]
+```
+
+Meaning:
+
+```asm
+R0 = mem32[R1]
+```
+
+---
+
+### ✅ Example 2: Store Word
+
+```asm
+STR R0, [R1]
+```
+
+Meaning:
+
+```asm
+mem32[R1] = R0
+```
+
+---
+
+### ✅ Example 3: Load Byte
+
+```asm
+LDRB R0, [R1]
+```
+
+Meaning:
+
+```asm
+R0 = mem8[R1]
+```
+
+---
+
+### ✅ Example 4: Store Halfword
+
+```asm
+STRH R0, [R1]
+```
+
+Meaning:
+
+```asm
+mem16[R1] = R0
+```
+
+---
+
+### ✅ Example 5: Signed Load
+
+```asm
+LDRSB R0, [R1]
+```
+
+Meaning:
+
+* Load 8-bit value
+* Extend sign to 32-bit
+
+---
+
+## 🔹 8. Conditional Execution
+
+Load/store instructions can be conditional:
+
+```asm
+LDREQ R0, [R1]
+```
+
+👉 Execute only if condition is true
+
+---
+
+## 🔹 9. Key Points for Exam
+
+* LDR loads data from memory to register
+* STR stores data from register to memory
+* Supports byte, halfword, and word transfers
+* Signed loads extend sign to 32-bit
+* Memory access only through LDR/STR
+
+---
+
+## 🔹 10. Exam-Ready Summary
+
+Load-store instructions in ARM are used to transfer data between memory and registers. LDR is used to load data from memory into a register, while STR stores data from a register into memory. Different variants such as LDRB, LDRH, and LDRSB allow access to different data sizes. These instructions are essential because ARM does not allow direct memory operations in arithmetic instructions.
+
+---
+![alt text](image-7.png)
+# ARM LDR/STR Addressing Modes – Detailed Exam Notes
+
+---
+
+## 🔹 1. Introduction
+
+In ARM load-store instructions, memory access is done using a **base register + offset**.
+
+👉 General idea:
+
+```asm
+Address = Base Register (Rn) ± Offset
+```
+
+---
+
+## 🔹 2. Basic Syntax
+
+```asm
+LDR Rd, [Rn, offset]
+STR Rd, [Rn, offset]
+```
+
+* `Rn` → base register (contains address)
+* `offset` → value added/subtracted
+
+---
+
+## 🔹 3. Types of Offset
+
+---
+
+## 🔸 3.1 Immediate Offset
+
+### 📌 Syntax
+
+```asm
+LDR R0, [R1, #8]
+```
+
+### 📌 Meaning
+
+```asm
+Address = R1 + 8
+R0 = mem[R1 + 8]
+```
+
+---
+
+### 📌 Range
+
+* For word access: **0 to 4095 (12-bit unsigned)**
+
+---
+
+## 🔸 3.2 Register Offset
+
+### 📌 Syntax
+
+```asm
+LDR R0, [R1, R2]
+```
+
+### 📌 Meaning
+
+```asm
+Address = R1 + R2
+```
+
+---
+
+## 🔸 3.3 Shifted Register Offset (VERY IMPORTANT)
+
+### 📌 Syntax
+
+```asm
+LDR R0, [R1, R2, LSL #2]
+```
+
+### 📌 Meaning
+
+```asm
+Address = R1 + (R2 << 2)
+```
+
+👉 Uses **barrel shifter**
+
+---
+
+## 🔹 4. Addition and Subtraction of Offset
+
+Offset can be:
+
+### ✅ Positive
+
+```asm
+LDR R0, [R1, #8]
+```
+
+### ✅ Negative
+
+```asm
+LDR R0, [R1, #-8]
+```
+
+### ✅ Register Negative
+
+```asm
+LDR R0, [R1, -R2]
+```
+
+---
+
+## 🔹 5. Halfword and Byte Offsets
+
+For instructions like:
+
+* LDRH, STRH
+* LDRB, STRB
+
+### 📌 Offset Options:
+
+* 8-bit immediate (0–255)
+* Register (no shift)
+
+---
+
+## 🔹 6. Addressing Modes (VERY IMPORTANT)
+
+---
+
+## 🔸 6.1 Offset Addressing
+
+### 📌 Syntax
+
+```asm
+LDR R0, [R1, #8]
+```
+
+### 📌 Meaning
+
+```asm
+R0 = mem[R1 + 8]
+```
+
+👉 Base register NOT updated
+
+---
+
+## 🔸 6.2 Pre-Indexed Addressing
+
+### 📌 Syntax
+
+```asm
+LDR R0, [R1, #8]!
+```
+
+### 📌 Meaning
+
+```asm
+R1 = R1 + 8
+R0 = mem[R1]
+```
+
+👉 Base register updated BEFORE access
+
+---
+
+## 🔸 6.3 Post-Indexed Addressing
+
+### 📌 Syntax
+
+```asm
+LDR R0, [R1], #8
+```
+
+### 📌 Meaning
+
+```asm
+R0 = mem[R1]
+R1 = R1 + 8
+```
+
+👉 Base register updated AFTER access
+
+---
+
+## 🔹 7. Write-back Concept
+
+* `!` indicates **write-back** (update base register)
+
+Example:
+
+```asm
+LDR R0, [R1, #8]!
+```
+
+---
+
+## 🔹 8. Examples
+
+---
+
+### Example 1
+
+```asm
+LDR R0, [R1, #8]
+```
+
+👉 Load from address R1 + 8
+
+---
+
+### Example 2
+
+```asm
+LDR R0, [R1, R2]
+```
+
+👉 Load from address R1 + R2
+
+---
+
+### Example 3
+
+```asm
+LDR R0, [R1, R2, LSL #2]
+```
+
+👉 Load from address R1 + (R2 × 4)
+
+---
+
+### Example 4
+
+```asm
+LDR R0, [R1], #8
+```
+
+👉 Load then increment R1
+
+---
+
+## 🔹 9. Key Points for Exam
+
+* Address = base register ± offset
+* Offset can be immediate or register
+* Register offset can be shifted
+* Three addressing modes: offset, pre-indexed, post-indexed
+* `!` means write-back
+
+---
+
+## 🔹 10. Exam-Ready Summary
+
+In ARM load-store instructions, memory addressing is performed using a base register and an offset. The offset can be an immediate value, a register, or a shifted register. Addressing modes include offset, pre-indexed, and post-indexed addressing. These modes provide flexibility in accessing memory efficiently.
+
+---
+![alt text](image-8.png)
+
+# ARM Single-Register Load–Store Addressing Modes – Indexing Methods (Detailed Exam Notes)
+
+---
+
+## 🔹 1. Introduction
+
+ARM provides flexible ways to compute the **effective memory address** for LDR/STR using a **base register (Rn)** and an **offset**. These are called **addressing (indexing) modes**.
+
+👉 Core idea:
+
+```
+Effective Address (EA) = Base (Rn) ± Offset
+```
+
+The offset can be an immediate or a register (optionally shifted).
+
+---
+
+## 🔹 2. Indexing Methods (VERY IMPORTANT)
+
+ARM defines three main indexing methods for single-register transfers:
+
+1. **Pre-indexed with write-back**
+2. **Pre-indexed (no write-back)**
+3. **Post-indexed**
+
+These determine **when** the base register is updated and **what address** is used for the memory access.
+
+---
+
+## 🔸 3. Pre-indexed with Write-back
+
+### 📌 Syntax
+
+```asm
+LDR Rd, [Rn, offset]!
+STR Rd, [Rn, offset]!
+```
+
+### 📌 Operation (Step-by-step)
+
+```
+Rn = Rn ± offset      ; update base first (write-back)
+EA = Rn               ; use updated base
+Rd = mem[EA]          ; for LDR
+mem[EA] = Rd          ; for STR
+```
+
+### 📌 Key Points
+
+* `!` indicates **write-back**
+* Base register **is updated BEFORE** the memory access
+
+### 📌 Example
+
+```asm
+LDR R0, [R1, #4]!
+```
+
+If `R1 = 1000`:
+
+```
+R1 = 1004
+R0 = mem[1004]
+```
+
+---
+
+## 🔸 4. Pre-indexed (No Write-back)
+
+### 📌 Syntax
+
+```asm
+LDR Rd, [Rn, offset]
+STR Rd, [Rn, offset]
+```
+
+### 📌 Operation
+
+```
+EA = Rn ± offset
+Rd = mem[EA]          ; for LDR
+mem[EA] = Rd          ; for STR
+Rn unchanged          ; no write-back
+```
+
+### 📌 Key Points
+
+* Base register **is NOT updated**
+* Offset is used only to compute address
+
+### 📌 Example
+
+```asm
+LDR R0, [R1, #4]
+```
+
+If `R1 = 1000`:
+
+```
+EA = 1004
+R0 = mem[1004]
+R1 remains 1000
+```
+
+---
+
+## 🔸 5. Post-indexed
+
+### 📌 Syntax
+
+```asm
+LDR Rd, [Rn], offset
+STR Rd, [Rn], offset
+```
+
+### 📌 Operation
+
+```
+EA = Rn               ; use original base
+Rd = mem[EA]          ; for LDR
+mem[EA] = Rd          ; for STR
+Rn = Rn ± offset      ; update base AFTER access
+```
+
+### 📌 Key Points
+
+* Base register **is updated AFTER** the memory access
+* No `!` is used
+
+### 📌 Example
+
+```asm
+LDR R0, [R1], #4
+```
+
+If `R1 = 1000`:
+
+```
+R0 = mem[1000]
+R1 = 1004
+```
+
+---
+
+## 🔹 6. Offset Forms
+
+The `offset` can be:
+
+### ✅ Immediate
+
+```asm
+#4, #-8
+```
+
+### ✅ Register
+
+```asm
+R2, -R2
+```
+
+### ✅ Shifted Register (uses barrel shifter)
+
+```asm
+R2, LSL #2
+R2, LSR #1
+```
+
+---
+
+## 🔹 7. Summary Table (Exam Favorite)
+
+| Method                 | Address Used                 | Base Update  | Example             |
+| ---------------------- | ---------------------------- | ------------ | ------------------- |
+| Pre-index + write-back | mem[Rn ± off] (after update) | Yes (before) | `LDR R0, [R1, #4]!` |
+| Pre-index (no WB)      | mem[Rn ± off]                | No           | `LDR R0, [R1, #4]`  |
+| Post-index             | mem[Rn]                      | Yes (after)  | `LDR R0, [R1], #4`  |
+
+---
+
+## 🔹 8. Visual Intuition
+
+Let `R1 = base`, `off = 4`:
+
+* **Pre-index (no WB):**
+
+  * Use `R1 + 4`, keep `R1`
+* **Pre-index + WB:**
+
+  * First `R1 = R1 + 4`, then use it
+* **Post-index:**
+
+  * Use `R1`, then `R1 = R1 + 4`
+
+---
+
+## 🔹 9. When to Use Which?
+
+* **Pre-index + WB:** walking pointers where base should move immediately
+* **Pre-index (no WB):** access nearby memory without changing base
+* **Post-index:** iterate through arrays (load/store then advance pointer)
+
+---
+
+## 🔹 10. Common Mistakes (Exam Tips)
+
+* Forgetting that `!` means **write-back before access**
+* Confusing pre-index vs post-index order
+* Updating base in pre-index without `!` (incorrect)
+
+---
+
+## 🔹 11. Exam-Ready Summary
+
+ARM single-register load/store instructions support three indexing methods: pre-indexed with write-back, pre-indexed without write-back, and post-indexed. These determine whether the base register is updated and whether the update happens before or after the memory access. This flexibility allows efficient array traversal and pointer manipulation.
+
+---
+
+
+![alt text](image-10.png)
+![alt text](image-9.png)
 
 
