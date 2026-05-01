@@ -1336,36 +1336,45 @@ It copies the contents of R1 into R0.
 Data processing instructions in ARM are used to perform arithmetic, logical, move, and comparison operations on register contents. These instructions do not directly access memory. Manipulation instructions store the result in a destination register, while comparison instructions only update the condition flags. The general syntax is `<operation>{cond}{S} Rd, Rn, Operand2`. Examples include ADD, SUB, AND, ORR, MOV, CMP, TST, and TEQ.
 
 ---
-
+![alt text](image-2.png)
 ![alt text](image-1.png)
-# Barrel Shifter in ARM – Exam Ready Notes
+# Barrel Shifter in ARM – Detailed Exam Notes
 
 ---
 
 ## 🔹 1. Introduction
 
-The **barrel shifter** is a special hardware unit in the ARM processor that allows shifting or rotating of data bits efficiently.
+A **barrel shifter** is a special hardware unit present inside the ARM processor.
 
-It is mainly used in **data processing instructions** where the **second operand (Operand2)** can be modified before being used by the ALU.
+It is used to **shift or rotate bits** of a register value before the value is given to the ALU (Arithmetic Logic Unit).
 
----
-
-## 🔹 2. Key Concept
-
-In ARM instructions:
-
-* Operand1 → directly goes to ALU
-* Operand2 → passes through **barrel shifter** → then goes to ALU
+In ARM data processing instructions, the **second operand (Operand2)** can be shifted or rotated using the barrel shifter.
 
 ---
 
-## 🔹 3. Advantage of Barrel Shifter
+## 🔹 2. Why Barrel Shifter is Important in ARM
 
-* Allows **shift + operation in a single instruction**
-* Improves performance
-* Reduces number of instructions
+ARM data processing instructions usually use two operands:
 
-### Example:
+```asm
+ADD R0, R1, R2
+```
+
+Meaning:
+
+```asm
+R0 = R1 + R2
+```
+
+Here:
+
+* `R1` is Operand1
+* `R2` is Operand2
+* ALU performs addition
+
+But in ARM, Operand2 can be modified before reaching the ALU.
+
+Example:
 
 ```asm
 ADD R0, R1, R2, LSL #2
@@ -1377,125 +1386,630 @@ Meaning:
 R0 = R1 + (R2 << 2)
 ```
 
+So `R2` is first shifted left by 2 bits and then added to `R1`.
+
+This is done by the **barrel shifter**.
+
 ---
 
-## 🔹 4. Types of Shift Operations
+## 🔹 3. Flow of Operation
+
+The flow is:
+
+```text
+Operand1  ---------------------> ALU
+
+Operand2 ---> Barrel Shifter ---> ALU
+
+ALU ---------------------------> Result
+```
+
+So:
+
+* Operand1 goes directly to ALU
+* Operand2 first goes through barrel shifter
+* Shifted/rotated Operand2 is then used by ALU
 
 ---
 
-### ✅ 1. LSL (Logical Shift Left)
+## 🔹 4. Main Advantage
+
+The main advantage of barrel shifter is that ARM can perform:
+
+```text
+Shift operation + arithmetic/logical operation
+```
+
+in a **single instruction**.
+
+Without barrel shifter:
 
 ```asm
-Rm, LSL #n
+MOV R3, R2, LSL #2
+ADD R0, R1, R3
 ```
 
-* Shifts bits to the left
-* Zeros are filled on the right
-
-📌 Equivalent to multiplication by 2^n
-
-Example:
-
-```
-5 (00000101) → LSL #1 → 10 (00001010)
-```
-
----
-
-### ✅ 2. LSR (Logical Shift Right)
-
-```asm
-Rm, LSR #n
-```
-
-* Shifts bits to the right
-* Zeros are filled on the left
-
-📌 Used for unsigned division by 2
-
-Example:
-
-```
-8 (00001000) → LSR #1 → 4 (00000100)
-```
-
----
-
-### ✅ 3. ASR (Arithmetic Shift Right)
-
-```asm
-Rm, ASR #n
-```
-
-* Shifts bits to the right
-* Sign bit (MSB) is preserved
-
-📌 Used for signed numbers
-
----
-
-### ✅ 4. ROR (Rotate Right)
-
-```asm
-Rm, ROR #n
-```
-
-* Bits shifted right
-* Bits falling off re-enter from left
-
----
-
-### ✅ 5. RRX (Rotate Right Extended)
-
-```asm
-Rm, RRX
-```
-
-* Rotate right by 1 bit using **Carry flag**
-
----
-
-## 🔹 5. Shift Amount Specification
-
-Shift amount can be specified in two ways:
-
----
-
-### 🔸 1. Immediate Shift
+With barrel shifter:
 
 ```asm
 ADD R0, R1, R2, LSL #2
 ```
 
-* Shift value is constant
+Thus, barrel shifter:
+
+* Reduces number of instructions
+* Improves speed
+* Makes code compact
+* Helps in multiplication/division by powers of 2
 
 ---
 
-### 🔸 2. Register Shift
+## 🔹 5. General Syntax
+
+```asm
+<Instruction> Rd, Rn, Rm, <shift_type> #shift_amount
+```
+
+Example:
+
+```asm
+ADD R0, R1, R2, LSL #2
+```
+
+Meaning:
+
+```asm
+R0 = R1 + (R2 shifted left by 2)
+```
+
+Where:
+
+| Part     | Meaning                           |
+| -------- | --------------------------------- |
+| `ADD`    | Operation                         |
+| `R0`     | Destination register              |
+| `R1`     | First operand register            |
+| `R2`     | Second operand register           |
+| `LSL #2` | Shift operation on second operand |
+
+---
+
+## 🔹 6. Operand2 in ARM
+
+In ARM data processing instructions, Operand2 can be:
+
+1. Immediate value
+2. Register value
+3. Register value with shift
+
+---
+
+### ✅ 1. Immediate Value
+
+```asm
+ADD R0, R1, #5
+```
+
+Meaning:
+
+```asm
+R0 = R1 + 5
+```
+
+Here Operand2 is a constant value.
+
+---
+
+### ✅ 2. Register Value
+
+```asm
+ADD R0, R1, R2
+```
+
+Meaning:
+
+```asm
+R0 = R1 + R2
+```
+
+Here Operand2 is register `R2`.
+
+---
+
+### ✅ 3. Register with Shift
+
+```asm
+ADD R0, R1, R2, LSL #1
+```
+
+Meaning:
+
+```asm
+R0 = R1 + (R2 << 1)
+```
+
+Here Operand2 is `R2` shifted left by 1.
+
+---
+
+## 🔹 7. Shift Amount
+
+The shift amount tells how many bit positions should be shifted or rotated.
+
+It can be specified in two ways:
+
+---
+
+### 🔸 A. Shift by Immediate Value
+
+```asm
+ADD R0, R1, R2, LSL #2
+```
+
+Here:
+
+* Shift amount is `#2`
+* It is fixed inside instruction
+
+Meaning:
+
+```asm
+R0 = R1 + (R2 << 2)
+```
+
+---
+
+### 🔸 B. Shift by Register Value
 
 ```asm
 ADD R0, R1, R2, LSL R3
 ```
 
-* Shift value is stored in register R3
+Here:
+
+* Shift amount is stored in register `R3`
+
+If:
+
+```asm
+R3 = 2
+```
+
+Then:
+
+```asm
+R0 = R1 + (R2 << 2)
+```
 
 ---
 
-## 🔹 6. General Syntax
+## 🔹 8. Types of Barrel Shifter Operations
+
+ARM supports the following shift and rotate operations:
+
+1. LSL – Logical Shift Left
+2. LSR – Logical Shift Right
+3. ASR – Arithmetic Shift Right
+4. ROR – Rotate Right
+5. RRX – Rotate Right Extended
+
+---
+
+# 🔸 8.1 LSL – Logical Shift Left
+
+## 📌 Meaning
+
+`LSL` shifts all bits to the **left**.
+
+Zeros are filled on the right side.
+
+---
+
+## 📌 Syntax
 
 ```asm
-<Instruction> Rd, Rn, Rm, <shift> #amount
+Rm, LSL #n
 ```
 
-Example:
+---
+
+## 📌 Example
+
+```text
+00000101  = 5
+```
+
+After:
+
+```asm
+LSL #1
+```
+
+Result:
+
+```text
+00001010  = 10
+```
+
+So:
+
+```text
+5 LSL #1 = 10
+```
+
+---
+
+## 📌 Use
+
+Logical Shift Left is used for multiplication by powers of 2.
+
+```text
+LSL #1  = multiply by 2
+LSL #2  = multiply by 4
+LSL #3  = multiply by 8
+```
+
+---
+
+## 📌 ARM Example
 
 ```asm
 ADD R0, R1, R2, LSL #2
 ```
 
+Meaning:
+
+```asm
+R0 = R1 + (R2 × 4)
+```
+
+If:
+
+```asm
+R1 = 10
+R2 = 3
+```
+
+Then:
+
+```asm
+R0 = 10 + (3 × 4)
+R0 = 22
+```
+
 ---
 
-## 🔹 7. Example with Logical Instruction
+# 🔸 8.2 LSR – Logical Shift Right
+
+## 📌 Meaning
+
+`LSR` shifts all bits to the **right**.
+
+Zeros are filled on the left side.
+
+---
+
+## 📌 Syntax
+
+```asm
+Rm, LSR #n
+```
+
+---
+
+## 📌 Example
+
+```text
+00001000 = 8
+```
+
+After:
+
+```asm
+LSR #1
+```
+
+Result:
+
+```text
+00000100 = 4
+```
+
+So:
+
+```text
+8 LSR #1 = 4
+```
+
+---
+
+## 📌 Use
+
+Logical Shift Right is used for division by powers of 2 for **unsigned numbers**.
+
+```text
+LSR #1 = divide by 2
+LSR #2 = divide by 4
+LSR #3 = divide by 8
+```
+
+---
+
+# 🔸 8.3 ASR – Arithmetic Shift Right
+
+## 📌 Meaning
+
+`ASR` shifts bits to the **right**, but it preserves the sign bit.
+
+It is used for **signed numbers**.
+
+---
+
+## 📌 Why ASR is Needed
+
+In signed numbers:
+
+* MSB = 0 means positive
+* MSB = 1 means negative
+
+If we use normal logical shift right on negative numbers, the sign may change.
+
+So ASR copies the MSB while shifting.
+
+---
+
+## 📌 Example for Positive Number
+
+```text
+00001000 = +8
+```
+
+After:
+
+```asm
+ASR #1
+```
+
+Result:
+
+```text
+00000100 = +4
+```
+
+---
+
+## 📌 Example for Negative Number
+
+```text
+10001000
+```
+
+After:
+
+```asm
+ASR #1
+```
+
+Result:
+
+```text
+11000100
+```
+
+Notice:
+
+* Left side is filled with `1`
+* Sign remains negative
+
+---
+
+## 📌 Difference Between LSR and ASR
+
+| LSR                       | ASR                     |
+| ------------------------- | ----------------------- |
+| Logical shift right       | Arithmetic shift right  |
+| Fills 0 on left           | Fills sign bit on left  |
+| Used for unsigned numbers | Used for signed numbers |
+
+---
+
+# 🔸 8.4 ROR – Rotate Right
+
+## 📌 Meaning
+
+`ROR` rotates bits to the right.
+
+The bits that go out from the right side come back from the left side.
+
+---
+
+## 📌 Syntax
+
+```asm
+Rm, ROR #n
+```
+
+---
+
+## 📌 Example
+
+```text
+10000001
+```
+
+After:
+
+```asm
+ROR #1
+```
+
+Result:
+
+```text
+11000000
+```
+
+Explanation:
+
+* Rightmost bit `1` goes out
+* It re-enters at the leftmost position
+
+---
+
+# 🔸 8.5 RRX – Rotate Right Extended
+
+## 📌 Meaning
+
+`RRX` means **Rotate Right Extended**.
+
+It rotates right by one bit using the **Carry flag**.
+
+---
+
+## 📌 How it Works
+
+```text
+Carry → Bit31 → Bit30 → ... → Bit1 → Bit0 → Carry
+```
+
+So:
+
+* Old Carry becomes new Bit31
+* Old Bit0 becomes new Carry
+
+---
+
+## 📌 Syntax
+
+```asm
+Rm, RRX
+```
+
+---
+
+## 📌 Example Concept
+
+Before:
+
+```text
+Carry = 1
+Rm = 00000010
+```
+
+After RRX:
+
+```text
+New MSB = 1
+Old bit0 goes into Carry
+```
+
+RRX is mainly used in multi-word arithmetic and bit manipulation.
+
+---
+
+## 🔹 9. Carry Flag and Barrel Shifter
+
+When a shift operation is performed, the bit that is shifted out may be placed into the **Carry flag**.
+
+But flags are updated only when the instruction uses the `S` suffix.
+
+---
+
+## 📌 Example
+
+```asm
+MOVS R0, R1, LSL #1
+```
+
+Here:
+
+* `R1` is shifted left by 1
+* Result is stored in `R0`
+* Flags are updated because `S` is used
+
+---
+
+## 📌 Example with Hex Value
+
+```asm
+R1 = 0x80000004
+MOVS R0, R1, LSL #1
+```
+
+Binary idea:
+
+* Bit 31 is `1`
+* When shifted left, that bit goes out
+* Carry flag becomes `1`
+
+Result:
+
+```asm
+R0 = 0x00000008
+C flag = 1
+```
+
+This is the idea shown in the slide.
+
+---
+
+## 🔹 10. Immediate Constants and Barrel Shifter
+
+ARM immediate values have a special encoding.
+
+An immediate value in ARM data processing instruction is commonly represented using:
+
+```text
+8-bit immediate value rotated right by an even number of positions
+```
+
+This allows ARM to represent more 32-bit constants than just 0 to 255.
+
+---
+
+## 📌 Example
+
+A small 8-bit value can be rotated to produce a larger 32-bit constant.
+
+This is useful because ARM instructions are fixed size, so there is limited space inside instruction encoding.
+
+---
+
+## 🔹 11. Barrel Shifter with Different Instructions
+
+The barrel shifter can be used with many data processing instructions.
+
+---
+
+## 📌 Example 1: ADD with Shift
+
+```asm
+ADD R0, R1, R2, LSL #2
+```
+
+Meaning:
+
+```asm
+R0 = R1 + (R2 × 4)
+```
+
+---
+
+## 📌 Example 2: SUB with Shift
+
+```asm
+SUB R0, R1, R2, LSR #1
+```
+
+Meaning:
+
+```asm
+R0 = R1 - (R2 / 2)
+```
+
+---
+
+## 📌 Example 3: AND with Shift
 
 ```asm
 AND R0, R1, R2, LSR #1
@@ -1509,31 +2023,1234 @@ R0 = R1 AND (R2 >> 1)
 
 ---
 
-## 🔹 8. Carry Flag and Shifting
+## 📌 Example 4: MOV with Shift
 
-* When shifting occurs, the bit that is shifted out can be stored in the **Carry flag**
-* If instruction has `S`, flags are updated
+```asm
+MOV R0, R1, LSL #3
+```
+
+Meaning:
+
+```asm
+R0 = R1 × 8
+```
+
+---
+
+## 🔹 12. Table of Barrel Shifter Operations
+
+| Operation | Full Form              | Meaning                         |
+| --------- | ---------------------- | ------------------------------- |
+| LSL       | Logical Shift Left     | Shift left, fill zeros on right |
+| LSR       | Logical Shift Right    | Shift right, fill zeros on left |
+| ASR       | Arithmetic Shift Right | Shift right, preserve sign bit  |
+| ROR       | Rotate Right           | Rotate bits right               |
+| RRX       | Rotate Right Extended  | Rotate right through Carry flag |
+
+---
+
+## 🔹 13. Difference Between Shift and Rotate
+
+| Shift                            | Rotate                                    |
+| -------------------------------- | ----------------------------------------- |
+| Bits shifted out are lost        | Bits shifted out re-enter from other side |
+| Example: LSL, LSR, ASR           | Example: ROR, RRX                         |
+| Used for multiplication/division | Used for bit manipulation                 |
+
+---
+
+## 🔹 14. Difference Between Immediate Shift and Register Shift
+
+| Immediate Shift       | Register Shift                     |
+| --------------------- | ---------------------------------- |
+| Shift amount is fixed | Shift amount is stored in register |
+| Example: `LSL #2`     | Example: `LSL R3`                  |
+| Faster and simpler    | More flexible                      |
+
+---
+
+## 🔹 15. Why Barrel Shifter is Powerful
+
+The barrel shifter is powerful because it allows complex operations to be done in one instruction.
 
 Example:
 
 ```asm
-MOVS R0, R1, LSL #1
+ADD R0, R1, R2, LSL #2
 ```
+
+This single instruction does:
+
+```text
+1. Shift R2 left by 2
+2. Add shifted value to R1
+3. Store result in R0
+```
+
+Without barrel shifter, multiple instructions would be needed.
+
+---
+
+## 🔹 16. Exam-Ready Summary
+
+The barrel shifter in ARM is a hardware unit used to shift or rotate the second operand before it is sent to the ALU. It supports operations such as LSL, LSR, ASR, ROR, and RRX. The shift amount can be specified either as an immediate value or by a register. The barrel shifter helps ARM perform shift and arithmetic/logical operations in a single instruction, improving speed and reducing code size.
+
+---
+![alt text](image-3.png)
+
+
+# Using Barrel Shifter with Arithmetic Instructions – Detailed Notes
+
+---
+
+## 🔹 1. Introduction
+
+The barrel shifter in ARM is a hardware unit that allows the second operand of a data processing instruction to be shifted or rotated before it is used by the ALU.
+
+This feature enables ARM to perform **shift and arithmetic operations in a single instruction**, making it very powerful and efficient.
+
+---
+
+## 🔹 2. Basic Concept
+
+In a normal arithmetic instruction:
+
+```asm
+ADD R0, R1, R2
+```
+
+Meaning:
+
+```asm
+R0 = R1 + R2
+```
+
+---
+
+With barrel shifter:
+
+```asm
+ADD R0, R1, R2, LSL #1
+```
+
+Meaning:
+
+```asm
+R0 = R1 + (R2 << 1)
+```
+
+👉 The second operand (R2) is shifted before addition.
+
+---
+
+## 🔹 3. Multiplication using Barrel Shifter
+
+ARM does not always require a multiplication instruction.
+
+Instead, multiplication by constants can be performed using **shift and add operations**.
+
+---
+
+### 🔥 Example: Multiply by 3
+
+We know:
+
+```text
+3 × x = x + 2x
+```
+
+And:
+
+```text
+2x = x << 1
+```
+
+So:
+
+```asm
+ADD R0, R1, R1, LSL #1
+```
+
+Meaning:
+
+```asm
+R0 = R1 + (R1 << 1)
+```
+
+👉 Result:
+
+```text
+R0 = 3 × R1
+```
+
+---
+
+### 🔥 Example: Multiply by 5
+
+```text
+5 × x = x + 4x
+4x = x << 2
+```
+
+```asm
+ADD R0, R1, R1, LSL #2
+```
+
+---
+
+### 🔥 Example: Multiply by 9
+
+```text
+9 × x = x + 8x
+8x = x << 3
+```
+
+```asm
+ADD R0, R1, R1, LSL #3
+```
+
+---
+
+### 🔥 Example: Multiply by 7
+
+```text
+7 × x = 8x - x
+8x = x << 3
+```
+
+```asm
+RSB R0, R1, R1, LSL #3
+```
+
+Meaning:
+
+```asm
+R0 = (R1 << 3) - R1
+```
+
+---
+
+## 🔹 4. General Technique
+
+To multiply a number using barrel shifter:
+
+### Method 1 (Addition)
+
+```text
+k × x = x + (x << n)
+```
+
+---
+
+### Method 2 (Subtraction)
+
+```text
+k × x = (x << n) - x
+```
+
+---
+
+## 🔹 5. Division using Barrel Shifter
+
+Division by powers of 2 can be done using shift right operations.
+
+### Example:
+
+```asm
+MOV R0, R1, LSR #1
+```
+
+Meaning:
+
+```asm
+R0 = R1 / 2
+```
+
+---
+
+## 🔹 6. Using Barrel Shifter with Other Arithmetic Instructions
+
+---
+
+### Example 1: ADD with Shift
+
+```asm
+ADD R0, R1, R2, LSL #2
+```
+
+```asm
+R0 = R1 + (R2 × 4)
+```
+
+---
+
+### Example 2: SUB with Shift
+
+```asm
+SUB R0, R1, R2, LSR #1
+```
+
+```asm
+R0 = R1 - (R2 / 2)
+```
+
+---
+
+### Example 3: AND with Shift
+
+```asm
+AND R0, R1, R2, LSR #1
+```
+
+```asm
+R0 = R1 AND (R2 >> 1)
+```
+
+---
+
+## 🔹 7. Advantages
+
+* Combines multiple operations in one instruction
+* Reduces instruction count
+* Improves execution speed
+* Efficient for multiplication/division by constants
+
+---
+
+## 🔹 8. Key Points for Exam
+
+* Barrel shifter modifies Operand2 before ALU operation
+* Used with arithmetic and logical instructions
+* Enables multiplication using shift operations
+* Reduces number of instructions
+
+---
+
+## 🔹 9. Exam-Ready Summary
+
+The barrel shifter in ARM allows the second operand of arithmetic instructions to be shifted before use. This enables efficient implementation of multiplication and division by constants using shift operations. For example, multiplication by 3 can be performed using ADD R0, R1, R1, LSL #1. This feature reduces instruction count and improves performance.
+
+---
+
+
+![alt text](image-4.png)
+
+# ARM Multiply Instructions – Detailed Exam Notes
+
+---
+
+## 🔹 1. Introduction
+
+Multiply instructions in ARM are used to perform multiplication of values stored in registers.
+
+Unlike simple arithmetic instructions, ARM provides different types of multiply instructions for:
+
+* Basic multiplication
+* Multiply with accumulation
+* Signed multiplication
+* Unsigned multiplication
+* Long (64-bit) multiplication
+
+---
+
+## 🔹 2. Basic Multiply Instructions
+
+---
+
+## ✅ 2.1 MUL – Multiply
+
+### 📌 Syntax
+
+```asm
+MUL{cond}{S} Rd, Rm, Rs
+```
+
+### 📌 Operation
+
+```asm
+Rd = Rm * Rs
+```
+
+### 📌 Explanation
+
+* Multiplies values in Rm and Rs
+* Stores result in Rd
+* Result is 32-bit
+
+### 📌 Example
+
+```asm
+MOV R1, #5
+MOV R2, #4
+MUL R0, R1, R2
+```
+
+Result:
+
+```asm
+R0 = 20
+```
+
+---
+
+## ✅ 2.2 MLA – Multiply Accumulate
+
+### 📌 Syntax
+
+```asm
+MLA{cond}{S} Rd, Rm, Rs, Rn
+```
+
+### 📌 Operation
+
+```asm
+Rd = (Rm * Rs) + Rn
+```
+
+### 📌 Explanation
+
+* Multiplies Rm and Rs
+* Adds Rn to the result
+* Stores final result in Rd
+
+### 📌 Example
+
+```asm
+MOV R1, #5
+MOV R2, #4
+MOV R3, #2
+MLA R0, R1, R2, R3
+```
+
+Result:
+
+```asm
+R0 = (5 * 4) + 2 = 22
+```
+
+---
+
+## 🔹 3. Long Multiply Instructions (64-bit Result)
+
+When multiplication result exceeds 32 bits, ARM uses **long multiply instructions**.
+
+These store result in **two registers**:
+
+* RdLo → lower 32 bits
+* RdHi → higher 32 bits
+
+---
+
+## 🔸 General Syntax
+
+```asm
+<instruction>{cond}{S} RdLo, RdHi, Rm, Rs
+```
+
+---
+
+## 🔹 4. Types of Long Multiply Instructions
+
+---
+
+## ✅ 4.1 UMULL – Unsigned Multiply Long
+
+### 📌 Operation
+
+```asm
+[RdHi, RdLo] = Rm * Rs
+```
+
+### 📌 Explanation
+
+* Performs unsigned multiplication
+* Stores 64-bit result
+
+---
+
+## ✅ 4.2 UMLAL – Unsigned Multiply Accumulate Long
+
+### 📌 Operation
+
+```asm
+[RdHi, RdLo] = [RdHi, RdLo] + (Rm * Rs)
+```
+
+### 📌 Explanation
+
+* Multiplies Rm and Rs
+* Adds to existing 64-bit value
+
+---
+
+## ✅ 4.3 SMULL – Signed Multiply Long
+
+### 📌 Operation
+
+```asm
+[RdHi, RdLo] = Rm * Rs
+```
+
+### 📌 Explanation
+
+* Performs signed multiplication
+* Handles negative numbers
+
+---
+
+## ✅ 4.4 SMLAL – Signed Multiply Accumulate Long
+
+### 📌 Operation
+
+```asm
+[RdHi, RdLo] = [RdHi, RdLo] + (Rm * Rs)
+```
+
+### 📌 Explanation
+
+* Signed multiplication with accumulation
+
+---
+
+## 🔹 5. Signed vs Unsigned
+
+| Type     | Meaning                                  |
+| -------- | ---------------------------------------- |
+| Signed   | Works with positive and negative numbers |
+| Unsigned | Works only with positive numbers         |
+
+---
+
+## 🔹 6. S Suffix (Important)
+
+If instruction has `S`:
+
+* Condition flags are updated
+
+Example:
+
+```asm
+MULS R0, R1, R2
+```
+
+---
+
+## 🔹 7. Condition Field
+
+Instructions can be conditional:
+
+```asm
+MULEQ R0, R1, R2
+```
+
+Executed only if condition is true.
+
+---
+
+## 🔹 8. Key Points for Exam
+
+* MUL performs simple multiplication
+* MLA performs multiply and accumulate
+* Long instructions produce 64-bit result
+* Signed and unsigned versions exist
+* Results stored in registers only
+
+---
+
+## 🔹 9. Difference Between Instructions
+
+| Instruction | Operation                           |
+| ----------- | ----------------------------------- |
+| MUL         | Rd = Rm * Rs                        |
+| MLA         | Rd = (Rm * Rs) + Rn                 |
+| UMULL       | 64-bit unsigned multiplication      |
+| UMLAL       | 64-bit unsigned multiply accumulate |
+| SMULL       | 64-bit signed multiplication        |
+| SMLAL       | 64-bit signed multiply accumulate   |
+
+---
+
+## 🔹 10. Exam-Ready Summary
+
+ARM multiply instructions are used to perform multiplication operations on register values. MUL performs simple multiplication, while MLA performs multiply and accumulate. For large results, long multiply instructions such as UMULL, UMLAL, SMULL, and SMLAL are used, which store 64-bit results in two registers. Both signed and unsigned versions are available, and instructions can optionally update condition flags.
+
+---
+
+# ARM State – Detailed Exam Notes
+
+---
+
+## 🔹 1. Definition
+
+ARM State is the **normal execution mode** of an ARM processor in which the CPU executes **32-bit instructions**.
+
+---
+
+## 🔹 2. Instruction Size
+
+* Each instruction is **32 bits (4 bytes)**
+* Fixed-length instruction format
+
+### Example:
+
+```asm
+ADD R0, R1, R2
+```
+
+---
+
+## 🔹 3. Key Features
+
+### ✅ 1. Full Instruction Set
+
+* Supports all arithmetic, logical, and data processing instructions
+* No restrictions on operations
+
+---
+
+### ✅ 2. Conditional Execution (Very Important)
+
+* Almost every instruction can be executed conditionally
+
+### Example:
+
+```asm
+ADDEQ R0, R1, R2
+```
+
+Meaning: Execute ADD only if condition is true
+
+---
+
+### ✅ 3. High Performance
+
+* Fewer instructions needed for complex operations
+* Faster execution compared to Thumb
+
+---
+
+### ✅ 4. Full Register Access
+
+* Uses all registers: R0 – R15
+
+---
+
+### ✅ 5. Barrel Shifter Support
+
+Allows shift operations within instructions:
+
+```asm
+ADD R0, R1, R2, LSL #2
+```
+
+Meaning:
+
+```asm
+R0 = R1 + (R2 × 4)
+```
+
+---
+
+## 🔹 4. Instruction Format (Concept)
+
+ARM instructions include fields such as:
+
+* Condition field
+* Opcode
+* Source and destination registers
+* Operand2 (can be shifted)
+
+---
+
+## 🔹 5. Advantages
+
+* High execution speed
+* Flexible and powerful instructions
+* Efficient handling of complex operations
+
+---
+
+## 🔹 6. Disadvantages
+
+* Larger code size (each instruction = 4 bytes)
+* More memory consumption compared to Thumb state
+
+---
+
+## 🔹 7. Control of ARM State
+
+ARM state is controlled by the **T-bit (Thumb bit)** in the CPSR register.
+
+| T-bit | Mode        |
+| ----- | ----------- |
+| 0     | ARM State   |
+| 1     | Thumb State |
+
+---
+
+## 🔹 8. When to Use ARM State
+
+* Performance-critical applications
+* Complex computations
+* Real-time systems
+
+---
+
+## 🔹 9. Example Execution
+
+```asm
+MOV R1, #5
+MOV R2, #10
+ADD R0, R1, R2
+```
+
+Each instruction is 32-bit and executed sequentially.
+
+---
+
+## 🔹 10. Exam-Ready Summary
+
+ARM state is the normal execution mode of an ARM processor in which 32-bit instructions are executed. It provides a full instruction set, supports conditional execution, allows use of all registers, and enables efficient operations using features like the barrel shifter. It offers high performance but results in larger code size.
+
+---
+# Thumb State – Detailed Exam Notes
+
+---
+
+## 🔹 1. Definition
+
+Thumb State is a mode of ARM processor execution in which the CPU executes **16-bit compressed instructions** instead of 32-bit ARM instructions.
+
+It is designed to **reduce code size** and improve memory efficiency.
+
+---
+
+## 🔹 2. Instruction Size
+
+* Each instruction is **16 bits (2 bytes)**
+* Half the size of ARM instructions
+
+### Example:
+
+```asm
+ADD R0, R1
+```
+
+---
+
+## 🔹 3. Key Features
+
+### ✅ 1. Reduced Instruction Set
+
+* Supports fewer instructions compared to ARM
+* Simplified operations
+
+---
+
+### ✅ 2. Smaller Code Size
+
+* Instructions take less memory
+* Programs are more compact
+
+---
+
+### ✅ 3. Limited Conditional Execution
+
+* Does not support full conditional execution like ARM
+* Uses **IT (If-Then)** instruction for conditions
+
+### Example:
+
+```asm
+IT EQ
+ADDEQ R0, R1
+```
+
+---
+
+### ✅ 4. Limited Register Access
+
+* Mainly uses registers **R0–R7**
+* Some instructions can access higher registers but limited
+
+---
+
+### ✅ 5. Lower Performance for Complex Tasks
+
+* Requires more instructions for complex operations
+* Slightly slower than ARM for heavy computation
+
+---
+
+## 🔹 4. Advantages
+
+* Reduces memory usage
+* Improves cache utilization
+* Suitable for embedded systems
+* Efficient for low-power devices
+
+---
+
+## 🔹 5. Disadvantages
+
+* Limited instruction set
+* Reduced flexibility
+* More instructions required for complex operations
+
+---
+
+## 🔹 6. Control of Thumb State
+
+Thumb state is controlled by the **T-bit (Thumb bit)** in CPSR register.
+
+| T-bit | Mode        |
+| ----- | ----------- |
+| 0     | ARM State   |
+| 1     | Thumb State |
+
+---
+
+## 🔹 7. Switching to Thumb State
+
+Switching is done using branch instructions such as:
+
+```asm
+BX Rn
+```
+
+If LSB of address = 1 → Thumb state
+
+---
+
+## 🔹 8. When to Use Thumb State
+
+* Memory-constrained systems
+* Embedded devices
+* Applications where code size matters more than speed
+
+---
+
+## 🔹 9. Example Execution
+
+```asm
+MOV R1, #5
+ADD R0, R1
+```
+
+Each instruction is 16-bit and compact.
+
+---
+
+## 🔹 10. ARM vs Thumb (Quick View)
+
+| Feature               | ARM State | Thumb State  |
+| --------------------- | --------- | ------------ |
+| Instruction size      | 32-bit    | 16-bit       |
+| Performance           | High      | Moderate     |
+| Code size             | Large     | Small        |
+| Registers             | R0–R15    | Mostly R0–R7 |
+| Conditional execution | Full      | Limited      |
+
+---
+
+## 🔹 11. Exam-Ready Summary
+
+Thumb state is a compressed instruction execution mode in ARM processors where instructions are 16 bits long. It reduces code size and memory usage but has a limited instruction set and lower flexibility compared to ARM state. It is mainly used in embedded systems where memory efficiency is important.
+
+---
+
+# ARM Code vs Thumb Code – Detailed Comparison (Exam Ready Notes)
+
+---
+
+## 🔹 1. Introduction
+
+ARM processors support two types of instruction sets:
+
+* **ARM Code** (32-bit instructions)
+* **Thumb Code** (16-bit compressed instructions)
+
+These two modes are used to balance **performance** and **memory efficiency**.
+
+---
+
+## 🔹 2. Basic Definition
+
+### ✅ ARM Code
+
+ARM code refers to instructions executed in **ARM state**, where each instruction is **32 bits (4 bytes)** long.
+
+---
+
+### ✅ Thumb Code
+
+Thumb code refers to instructions executed in **Thumb state**, where each instruction is typically **16 bits (2 bytes)** long.
+
+---
+
+## 🔹 3. Detailed Comparison Table
+
+| Feature               | ARM Code                           | Thumb Code                       |
+| --------------------- | ---------------------------------- | -------------------------------- |
+| Instruction Size      | 32-bit (4 bytes)                   | 16-bit (2 bytes)                 |
+| Code Density          | Low (larger programs)              | High (compact programs)          |
+| Memory Usage          | High                               | Low                              |
+| Performance           | High for complex operations        | Slightly lower for complex tasks |
+| Instruction Set       | Full instruction set               | Reduced/compact instruction set  |
+| Register Access       | Full access (R0–R15)               | Mostly R0–R7 (limited)           |
+| Conditional Execution | Almost all instructions support it | Limited (uses IT instruction)    |
+| Flexibility           | High                               | Moderate                         |
+| Power Consumption     | Higher                             | Lower                            |
+| Use Case              | Performance-critical tasks         | Memory-constrained systems       |
+
+---
+
+## 🔹 4. Example of ARM Code
+
+```asm
+MOV R1, #5
+MOV R2, #10
+ADD R0, R1, R2
+```
+
+### 📌 Explanation:
+
+* Each instruction is 32-bit
+* Uses full instruction set
+* Executes faster for complex logic
+
+---
+
+## 🔹 5. Example of Thumb Code
+
+```asm
+MOV R1, #5
+ADD R0, R1
+```
+
+### 📌 Explanation:
+
+* Instructions are 16-bit
+* Simpler format
+* More compact code
+
+---
+
+## 🔹 6. Key Concept (VERY IMPORTANT)
+
+* ARM Code → Optimized for **speed and performance**
+* Thumb Code → Optimized for **memory and size**
+
+---
+
+## 🔹 7. When to Use Which?
+
+### Use ARM Code when:
+
+* High performance is required
+* Complex calculations are needed
+
+### Use Thumb Code when:
+
+* Memory is limited
+* Code size needs to be small
+
+---
+
+## 🔹 8. Exam-Ready Summary
+
+ARM code uses 32-bit instructions and provides high performance with a full instruction set, while Thumb code uses 16-bit compressed instructions to reduce code size and memory usage. ARM code is preferred for speed, whereas Thumb code is preferred for memory efficiency.
+
+---
+
+# ARM Code vs Thumb Code – Detailed Comparison (Exam Ready Notes)
+
+---
+
+## 🔹 1. Introduction
+
+ARM processors support two types of instruction sets:
+
+* **ARM Code** (32-bit instructions)
+* **Thumb Code** (16-bit compressed instructions)
+
+These two modes are used to balance **performance** and **memory efficiency**.
+
+---
+
+## 🔹 2. Basic Definition
+
+### ✅ ARM Code
+
+ARM code refers to instructions executed in **ARM state**, where each instruction is **32 bits (4 bytes)** long.
+
+---
+
+### ✅ Thumb Code
+
+Thumb code refers to instructions executed in **Thumb state**, where each instruction is typically **16 bits (2 bytes)** long.
+
+---
+
+## 🔹 3. Detailed Comparison Table
+
+| Feature               | ARM Code                           | Thumb Code                       |
+| --------------------- | ---------------------------------- | -------------------------------- |
+| Instruction Size      | 32-bit (4 bytes)                   | 16-bit (2 bytes)                 |
+| Code Density          | Low (larger programs)              | High (compact programs)          |
+| Memory Usage          | High                               | Low                              |
+| Performance           | High for complex operations        | Slightly lower for complex tasks |
+| Instruction Set       | Full instruction set               | Reduced/compact instruction set  |
+| Register Access       | Full access (R0–R15)               | Mostly R0–R7 (limited)           |
+| Conditional Execution | Almost all instructions support it | Limited (uses IT instruction)    |
+| Flexibility           | High                               | Moderate                         |
+| Power Consumption     | Higher                             | Lower                            |
+| Use Case              | Performance-critical tasks         | Memory-constrained systems       |
+
+---
+
+## 🔹 4. Example of ARM Code
+
+```asm
+MOV R1, #5
+MOV R2, #10
+ADD R0, R1, R2
+```
+
+### 📌 Explanation:
+
+* Each instruction is 32-bit
+* Uses full instruction set
+* Executes faster for complex logic
+
+---
+
+## 🔹 5. Example of Thumb Code
+
+```asm
+MOV R1, #5
+ADD R0, R1
+```
+
+### 📌 Explanation:
+
+* Instructions are 16-bit
+* Simpler format
+* More compact code
+
+---
+
+## 🔹 6. Key Concept (VERY IMPORTANT)
+
+* ARM Code → Optimized for **speed and performance**
+* Thumb Code → Optimized for **memory and size**
+
+---
+
+## 🔹 7. When to Use Which?
+
+### Use ARM Code when:
+
+* High performance is required
+* Complex calculations are needed
+
+### Use Thumb Code when:
+
+* Memory is limited
+* Code size needs to be small
+
+---
+
+## 🔹 8. Exam-Ready Summary
+
+ARM code uses 32-bit instructions and provides high performance with a full instruction set, while Thumb code uses 16-bit compressed instructions to reduce code size and memory usage. ARM code is preferred for speed, whereas Thumb code is preferred for memory efficiency.
+
+---
+
+![alt text](image-5.png)
+
+# ARM Branch Instructions – Detailed Exam Notes
+
+---
+
+## 🔹 1. Introduction
+
+Branch instructions in ARM are used to **change the flow of program execution**.
+
+Normally, instructions execute sequentially, but branch instructions allow the processor to:
+
+* Jump to another location
+* Implement loops
+* Perform conditional execution
+* Call and return from functions
+
+---
+
+## 🔹 2. Types of Branch Instructions
+
+ARM provides the following branch instructions:
+
+* **B** → Branch
+* **BL** → Branch with Link
+* **BX** → Branch and Exchange
+* **BLX** → Branch with Link and Exchange
+
+---
+
+## 🔹 3. B – Branch Instruction
+
+### 📌 Syntax
+
+```asm
+B{cond} label
+```
+
+### 📌 Operation
+
+```asm
+PC = label
+```
+
+### 📌 Explanation
+
+* Transfers control to a specified label
+* Used for unconditional or conditional jumps
+
+### 📌 Example
+
+```asm
+B LOOP
+```
+
+---
+
+## 🔹 4. BL – Branch with Link
+
+### 📌 Syntax
+
+```asm
+BL{cond} label
+```
+
+### 📌 Operation
+
+```asm
+PC = label
+LR = address of next instruction
+```
+
+### 📌 Explanation
+
+* Used for **function calls**
+* Saves return address in **Link Register (LR = R14)**
+
+### 📌 Example
+
+```asm
+BL FUNCTION
+```
+
+---
+
+## 🔹 5. BX – Branch and Exchange
+
+### 📌 Syntax
+
+```asm
+BX{cond} Rm
+```
+
+### 📌 Operation
+
+```asm
+PC = Rm & 0xFFFFFFFE
+T = Rm & 1
+```
+
+### 📌 Explanation
+
+* Branches to address stored in register Rm
+* Switches between ARM and Thumb state
+
+### 📌 Key Concept
+
+| LSB of Address | Mode        |
+| -------------- | ----------- |
+| 0              | ARM State   |
+| 1              | Thumb State |
+
+---
+
+## 🔹 6. BLX – Branch with Link and Exchange
+
+### 📌 Syntax
+
+```asm
+BLX{cond} label
+BLX{cond} Rm
+```
+
+### 📌 Operation
+
+#### Case 1: Immediate label
+
+```asm
+PC = label
+T = 1
+LR = return address
+```
+
+#### Case 2: Register
+
+```asm
+PC = Rm & 0xFFFFFFFE
+T = Rm & 1
+LR = return address
+```
+
+### 📌 Explanation
+
+* Combines **function call + state switching**
+* Used for interworking between ARM and Thumb
+
+---
+
+## 🔹 7. Conditional Branching
+
+All branch instructions can be conditional using condition codes:
+
+```asm
+BEQ label
+BNE label
+BGT label
+BLT label
+```
+
+---
+
+## 🔹 8. Summary Table
+
+| Instruction | Function                     | Key Feature                 |
+| ----------- | ---------------------------- | --------------------------- |
+| B           | Jump                         | Changes PC                  |
+| BL          | Function call                | Saves return address in LR  |
+| BX          | Branch + state change        | Switches ARM/Thumb          |
+| BLX         | Function call + state change | Saves LR and switches state |
 
 ---
 
 ## 🔹 9. Key Points for Exam
 
-* Barrel shifter modifies Operand2 before ALU operation
-* Supports shift and rotate operations
-* Improves efficiency by combining operations
-* Used in arithmetic and logical instructions
+* Branch instructions modify the **Program Counter (PC)**
+* BL saves return address in **LR**
+* BX and BLX are used for **ARM–Thumb interworking**
+* LSB of address determines execution state
 
 ---
 
-## 🔹 10. Exam Summary
+## 🔹 10. Exam-Ready Summary
 
-The barrel shifter in ARM allows the second operand to be shifted or rotated before being used in data processing instructions. It supports operations such as LSL, LSR, ASR, ROR, and RRX. This feature improves performance by combining shift and arithmetic operations in a single instruction.
+Branch instructions in ARM are used to alter program flow by modifying the program counter. B performs simple branching, BL is used for function calls by saving the return address in LR, BX is used for branching with state switching, and BLX combines function calling with state switching.
 
 ---
 
