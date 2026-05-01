@@ -3948,3 +3948,640 @@ ARM single-register load/store instructions support three indexing methods: pre-
 ![alt text](image-9.png)
 
 
+# ARM Stack Operations – Detailed Exam Notes
+
+---
+
+## 🔹 1. Introduction
+
+Stack operations in ARM are performed using **multiple register transfer instructions (LDM and STM)**.
+
+👉 Stack is a special memory structure used for:
+
+* Function calls
+* Saving registers
+* Temporary data storage
+
+---
+
+## 🔹 2. Basic Stack Operations
+
+### ✅ PUSH (Store to Stack)
+
+* Adds data to stack
+* Implemented using **STM (Store Multiple)**
+
+```asm
+PUSH {R0, R1}
+```
+
+Equivalent:
+
+```asm
+STMDB SP!, {R0, R1}
+```
+
+---
+
+### ✅ POP (Load from Stack)
+
+* Removes data from stack
+* Implemented using **LDM (Load Multiple)**
+
+```asm
+POP {R0, R1}
+```
+
+Equivalent:
+
+```asm
+LDMIA SP!, {R0, R1}
+```
+
+---
+
+## 🔹 3. Stack Types (VERY IMPORTANT)
+
+A stack can be classified based on:
+
+---
+
+### 🔸 1. Growth Direction
+
+| Type           | Meaning                                |
+| -------------- | -------------------------------------- |
+| Ascending (A)  | Stack grows to higher memory addresses |
+| Descending (D) | Stack grows to lower memory addresses  |
+
+---
+
+### 🔸 2. Stack Condition
+
+| Type      | Meaning                           |
+| --------- | --------------------------------- |
+| Full (F)  | SP points to last filled location |
+| Empty (E) | SP points to next empty location  |
+
+---
+
+## 🔹 4. Types of Stacks
+
+| Stack Type | Full Form        |
+| ---------- | ---------------- |
+| FA         | Full Ascending   |
+| FD         | Full Descending  |
+| EA         | Empty Ascending  |
+| ED         | Empty Descending |
+
+---
+
+## 🔹 5. Addressing Modes for Stack (VERY IMPORTANT)
+
+| Mode | Description      | POP (LDM)     | PUSH (STM)    |
+| ---- | ---------------- | ------------- | ------------- |
+| FA   | Full Ascending   | LDMFA / LDMDA | STMFA / STMIB |
+| FD   | Full Descending  | LDMFD / LDMIA | STMFD / STMDB |
+| EA   | Empty Ascending  | LDMEA / LDMDB | STMEA / STMIA |
+| ED   | Empty Descending | LDMED / LDMIB | STMED / STMDA |
+
+---
+
+## 🔹 6. Most Common Stack Used
+
+👉 **Full Descending (FD)** is most commonly used in ARM
+
+So:
+
+```asm
+PUSH = STMDB SP!
+POP  = LDMIA SP!
+```
+
+---
+
+## 🔹 7. Example (Step-by-Step)
+
+Assume:
+
+```asm
+SP = 0x80018
+R0 = 1
+R1 = 2
+```
+
+### PUSH Operation
+
+```asm
+STMDB SP!, {R0, R1}
+```
+
+Execution:
+
+| Address | Value |
+| ------- | ----- |
+| 0x80014 | R1    |
+| 0x80018 | R0    |
+
+New SP:
+
+```asm
+SP = 0x80014
+```
+
+---
+
+### POP Operation
+
+```asm
+LDMIA SP!, {R0, R1}
+```
+
+Execution:
+
+| Address | Value |
+| ------- | ----- |
+| 0x80014 | R0    |
+| 0x80018 | R1    |
+
+New SP:
+
+```asm
+SP = 0x8001C
+```
+
+---
+
+## 🔹 8. Key Concepts
+
+* Stack works on **LIFO (Last In First Out)**
+* SP (Stack Pointer) is used as base register
+* PUSH uses STM
+* POP uses LDM
+
+---
+
+## 🔹 9. Key Points for Exam
+
+* Stack can be ascending or descending
+* Stack can be full or empty
+* 4 stack types: FA, FD, EA, ED
+* PUSH = store multiple
+* POP = load multiple
+* FD stack is most commonly used
+
+---
+
+## 🔹 10. Exam-Ready Summary
+
+Stack operations in ARM are implemented using multiple register transfer instructions. PUSH operations use STM instructions, while POP operations use LDM instructions. Stacks can be classified as ascending or descending and full or empty, resulting in four types: FA, FD, EA, and ED. The most commonly used stack type is full descending.
+
+---
+
+![alt text](image-11.png)
+# ARM Swap Instruction (SWP, SWPB) – Detailed Exam Notes
+
+---
+
+## 🔹 1. Introduction
+
+The **Swap instruction** in ARM is used to **exchange data between a register and a memory location** in a single atomic operation.
+
+👉 It is useful for:
+
+* Synchronization
+* Mutual exclusion (locks)
+* Shared memory access
+
+---
+
+## 🔹 2. Types of Swap Instructions
+
+| Instruction | Meaning            |
+| ----------- | ------------------ |
+| SWP         | Swap a 32-bit word |
+| SWPB        | Swap an 8-bit byte |
+
+---
+
+## 🔹 3. Syntax
+
+```asm
+SWP{cond} Rd, Rm, [Rn]
+SWPB{cond} Rd, Rm, [Rn]
+```
+
+---
+
+## 🔹 4. Operation (VERY IMPORTANT)
+
+### 🔸 For SWP (Word)
+
+```asm
+temp = mem32[Rn]
+mem32[Rn] = Rm
+Rd = temp
+```
+
+---
+
+### 🔸 For SWPB (Byte)
+
+```asm
+temp = mem8[Rn]
+mem8[Rn] = Rm
+Rd = temp
+```
+
+---
+
+## 🔹 5. Step-by-Step Explanation
+
+Assume:
+
+```asm
+R1 = 1000
+R2 = 50
+mem[1000] = 20
+```
+
+Instruction:
+
+```asm
+SWP R0, R2, [R1]
+```
+
+Execution:
+
+1. Read memory → temp = 20
+2. Store R2 → mem[1000] = 50
+3. Store temp in Rd → R0 = 20
+
+---
+
+## 🔹 6. Key Concept
+
+👉 SWP performs **read + write in one instruction (atomic operation)**
+
+---
+
+## 🔹 7. Atomic Operation (VERY IMPORTANT)
+
+* No other instruction can interrupt during execution
+* Used in **multi-threading and synchronization**
+
+---
+
+## 🔹 8. Difference Between SWP and SWPB
+
+| Feature       | SWP    | SWPB  |
+| ------------- | ------ | ----- |
+| Data size     | 32-bit | 8-bit |
+| Memory access | Word   | Byte  |
+
+---
+
+## 🔹 9. Limitations (IMPORTANT)
+
+* Works only with memory address in register
+* Does not support complex addressing modes
+* Deprecated in newer ARM architectures (replaced by LDREX/STREX)
+
+---
+
+## 🔹 10. Key Points for Exam
+
+* SWP swaps word between register and memory
+* SWPB swaps byte
+* Operation is atomic
+* Used in synchronization
+
+---
+
+## 🔹 11. Exam-Ready Summary
+
+The SWP instruction in ARM is used to exchange data between a register and a memory location in a single atomic operation. SWP operates on 32-bit words, while SWPB operates on 8-bit bytes. These instructions are useful for synchronization in shared memory systems.
+
+---
+
+![alt text](image-12.png)
+# ARM Software Interrupt (SWI) – Detailed Exam Notes
+
+---
+
+## 🔹 1. Introduction
+
+A **Software Interrupt (SWI)** is an instruction that **intentionally triggers an exception** to transfer control from user code to the **operating system (OS) / supervisor**.
+
+👉 Primary use:
+
+* Calling OS services (system calls)
+* Performing privileged operations safely
+
+---
+
+## 🔹 2. Syntax
+
+```asm
+SWI{cond} SWI_number
+```
+
+* `cond` → optional condition code
+* `SWI_number` → immediate value identifying the requested service
+
+---
+
+## 🔹 3. What Happens on SWI (Step-by-Step) 🔥
+
+When SWI executes, the processor performs an **exception entry sequence**:
+
+1. **Save return address**
+
+   ```text
+   LR_svc = address of next instruction after SWI
+   ```
+
+2. **Save current status**
+
+   ```text
+   SPSR_svc = CPSR
+   ```
+
+3. **Switch mode to Supervisor (SVC)**
+
+   ```text
+   CPSR.mode = SVC
+   ```
+
+4. **Disable normal interrupts (IRQ)**
+
+   ```text
+   CPSR.I = 1
+   ```
+
+5. **Branch to SWI handler**
+
+   ```text
+   PC = vector_base + 0x08
+   ```
+
+👉 `vector_base + 0x08` is the **SWI vector address** in the exception vector table.
+
+---
+
+## 🔹 4. Exception Vector Table (Concept)
+
+ARM has fixed addresses for exceptions:
+
+| Exception      | Offset   |
+| -------------- | -------- |
+| Reset          | 0x00     |
+| Undefined      | 0x04     |
+| **SWI**        | **0x08** |
+| Prefetch Abort | 0x0C     |
+| Data Abort     | 0x10     |
+| IRQ            | 0x18     |
+| FIQ            | 0x1C     |
+
+👉 SWI always jumps to **0x08 offset**.
+
+---
+
+## 🔹 5. Role of SWI Number
+
+* The immediate value (`SWI_number`) identifies **which OS service to execute**
+* The OS handler reads this value and dispatches the appropriate routine
+
+### Example
+
+```asm
+SWI 0x11
+```
+
+👉 OS interprets `0x11` as a specific service (e.g., print, exit, etc. depending on system)
+
+---
+
+## 🔹 6. Returning from SWI
+
+After the OS routine completes, control returns to user program using:
+
+```asm
+MOVS PC, LR
+```
+
+👉 This restores:
+
+* PC (return address)
+* CPSR (from SPSR)
+
+---
+
+## 🔹 7. Key Registers Involved
+
+| Register | Purpose               |
+| -------- | --------------------- |
+| LR_svc   | Stores return address |
+| SPSR_svc | Stores old CPSR       |
+| CPSR     | Updated to SVC mode   |
+| PC       | Jump to handler       |
+
+---
+
+## 🔹 8. Why SWI is Important
+
+* Provides **controlled access to OS**
+* Maintains **security (user vs privileged mode)**
+* Used in **system calls and APIs**
+
+---
+
+## 🔹 9. Example Flow
+
+```asm
+; User program
+MOV R0, #5
+SWI 0x01
+ADD R1, R1, #1
+```
+
+Execution:
+
+1. SWI triggers exception
+2. Control goes to OS handler
+3. OS performs service
+4. Returns to next instruction (`ADD`)
+
+---
+
+## 🔹 10. Key Points for Exam
+
+* SWI generates a software interrupt
+* Used to call OS routines
+* Switches to **Supervisor (SVC) mode**
+* Saves return address in **LR_svc**
+* Jumps to **vector address 0x08**
+
+---
+
+## 🔹 11. Exam-Ready Summary
+
+The SWI instruction in ARM is used to generate a software interrupt that transfers control to the operating system. It saves the current state, switches the processor to supervisor mode, and branches to the SWI handler at vector address 0x08. It is mainly used to implement system calls.
+
+---
+
+![alt text](image-13.png)
+
+# ARM Program Status Register (PSR) Instructions – Detailed Exam Notes
+
+---
+
+## 🔹 1. Introduction
+
+The **Program Status Register (PSR)** in ARM stores important information about the processor state.
+
+There are two types:
+
+* **CPSR (Current Program Status Register)**
+* **SPSR (Saved Program Status Register)**
+
+👉 PSR contains:
+
+* Condition flags
+* Processor mode
+* Interrupt control bits
+* Execution state (ARM/Thumb)
+
+---
+
+## 🔹 2. CPSR vs SPSR
+
+| Register | Purpose                               |
+| -------- | ------------------------------------- |
+| CPSR     | Holds current processor state         |
+| SPSR     | Stores previous CPSR during exception |
+
+---
+
+## 🔹 3. Fields in CPSR (VERY IMPORTANT)
+
+| Field     | Meaning                          |
+| --------- | -------------------------------- |
+| N         | Negative flag                    |
+| Z         | Zero flag                        |
+| C         | Carry flag                       |
+| V         | Overflow flag                    |
+| I         | IRQ disable                      |
+| F         | FIQ disable                      |
+| T         | Thumb state bit                  |
+| Mode bits | Processor mode (User, SVC, etc.) |
+
+---
+
+## 🔹 4. Instructions to Access PSR
+
+ARM provides two instructions:
+
+* **MRS (Move PSR to Register)**
+* **MSR (Move Register to PSR)**
+
+---
+
+## 🔸 4.1 MRS Instruction
+
+### 📌 Syntax
+
+```asm
+MRS Rd, CPSR
+MRS Rd, SPSR
+```
+
+### 📌 Operation
+
+```asm
+Rd = CPSR or SPSR
+```
+
+### 📌 Explanation
+
+* Copies PSR contents into a general-purpose register
+* Used to read flags or mode
+
+### 📌 Example
+
+```asm
+MRS R0, CPSR
+```
+
+---
+
+## 🔸 4.2 MSR Instruction
+
+### 📌 Syntax
+
+```asm
+MSR CPSR, Rm
+MSR SPSR, Rm
+```
+
+### 📌 Operation
+
+```asm
+CPSR or SPSR = Rm
+```
+
+### 📌 Explanation
+
+* Writes register value into PSR
+* Used to change flags, mode, or control bits
+
+### 📌 Example
+
+```asm
+MSR CPSR, R0
+```
+
+---
+
+## 🔹 5. Important Note (VERY IMPORTANT)
+
+* Not all bits of CPSR can be modified in user mode
+* Only privileged modes can modify control fields
+
+---
+
+## 🔹 6. Use Cases
+
+* Checking condition flags
+* Switching processor modes
+* Enabling/disabling interrupts
+* Saving/restoring processor state
+
+---
+
+## 🔹 7. Example Flow
+
+```asm
+MRS R0, CPSR
+ORR R0, R0, #0x80   ; disable IRQ
+MSR CPSR, R0
+```
+
+---
+
+## 🔹 8. Key Points for Exam
+
+* CPSR holds current state
+* SPSR holds saved state during exception
+* MRS reads PSR
+* MSR writes PSR
+* Contains flags (NZCV) and control bits
+
+---
+
+## 🔹 9. Exam-Ready Summary
+
+Program Status Register instructions in ARM include MRS and MSR. MRS transfers the contents of CPSR or SPSR into a general-purpose register, while MSR writes data from a register into CPSR or SPSR. These instructions are used to control processor state and flags.
+
+---
+
+
