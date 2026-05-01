@@ -1,3 +1,5 @@
+
+
 # ARM Architecture – Exam Ready Notes
 
 ---
@@ -5028,3 +5030,263 @@ ARM does not support direct loading of 32-bit constants into registers. Instead,
 ## 💬 Viva Answer
 
 ARM uses LDR pseudo-instruction to load constants and ADR to load addresses because it cannot directly encode 32-bit constants in instructions.
+
+
+
+---
+# PYQ
+
+
+![alt text](image-17.png)
+
+# Microprocessor vs Microcontroller – Detailed Comparison (10 Marks)
+
+---
+
+## 🔹 1. Introduction
+
+A **microprocessor** and a **microcontroller** are both computing devices, but they differ in architecture, functionality, and applications.
+
+---
+
+## 🔹 2. Comparison Table (VERY IMPORTANT)
+
+| Feature              | Microprocessor                                            | Microcontroller                                  |
+| -------------------- | --------------------------------------------------------- | ------------------------------------------------ |
+| Definition           | A CPU on a single chip used for general-purpose computing | A complete system on a chip (CPU + memory + I/O) |
+| Components           | Only CPU                                                  | CPU + RAM + ROM + I/O ports + timers             |
+| Memory               | External memory required                                  | Internal memory available                        |
+| Cost                 | Expensive (needs external components)                     | Low cost (integrated system)                     |
+| Size                 | Large system size                                         | Compact and small                                |
+| Power Consumption    | High                                                      | Low                                              |
+| Speed                | High processing power                                     | Moderate speed                                   |
+| Application          | General-purpose systems (PCs, laptops)                    | Embedded systems (washing machine, microwave)    |
+| Flexibility          | More flexible                                             | Less flexible (specific tasks)                   |
+| Complexity           | Complex design                                            | Simple design                                    |
+| Peripheral Devices   | Needs external peripherals                                | Built-in peripherals                             |
+| Real-time Capability | Not ideal for real-time                                   | Ideal for real-time systems                      |
+
+---
+
+## 🔹 3. Example
+
+### Microprocessor Example:
+
+* Intel 8086
+* Used in computers
+
+### Microcontroller Example:
+
+* ARM Cortex-M
+* Used in embedded systems like smart devices
+
+---
+
+## 🔹 4. Key Points for Exam
+
+* Microprocessor = CPU only
+* Microcontroller = complete system on chip
+* Microprocessor used in general computing
+* Microcontroller used in embedded systems
+
+---
+
+## 🔹 5. Exam-Ready Conclusion
+
+A microprocessor is a general-purpose computing unit that requires external memory and peripherals, while a microcontroller is a compact integrated system designed for specific embedded applications with built-in memory and I/O components.
+
+---
+
+
+![alt text](image-18.png)
+![alt text](image-19.png)
+
+# Thumb Stack Instructions – Detailed Exam Notes
+
+---
+
+## 🔹 1. Introduction
+
+In **Thumb state**, stack operations are simplified versions of ARM multiple register transfer instructions.
+
+👉 Thumb provides dedicated instructions:
+
+* **PUSH** → store registers to stack
+* **POP** → load registers from stack
+
+These are internally based on **STM/LDM instructions**.
+
+---
+
+## 🔹 2. Stack Concept (Quick Revision)
+
+* Stack follows **LIFO (Last In First Out)**
+* Uses **SP (Stack Pointer)** → register R13
+
+---
+
+## 🔹 3. PUSH Instruction
+
+### 📌 Syntax
+
+```asm
+PUSH {register_list}
+```
+
+---
+
+### 📌 Operation
+
+```text
+SP = SP - 4 × N
+mem[SP] = registers
+```
+
+👉 Stores registers onto stack
+
+---
+
+### 📌 Example
+
+```asm
+PUSH {R0, R1, R2}
+```
+
+Execution:
+
+* SP decreases
+* Values stored in memory
+
+---
+
+## 🔹 4. POP Instruction
+
+### 📌 Syntax
+
+```asm
+POP {register_list}
+```
+
+---
+
+### 📌 Operation
+
+```text
+registers = mem[SP]
+SP = SP + 4 × N
+```
+
+👉 Retrieves values from stack
+
+---
+
+### 📌 Example
+
+```asm
+POP {R0, R1, R2}
+```
+
+---
+
+## 🔹 5. Internal Mapping (VERY IMPORTANT 🔥)
+
+Thumb instructions map to ARM instructions:
+
+| Thumb | Equivalent ARM |
+| ----- | -------------- |
+| PUSH  | STMDB SP!      |
+| POP   | LDMIA SP!      |
+
+---
+
+## 🔹 6. Stack Type Used
+
+👉 Thumb uses:
+
+**Full Descending Stack (FD)**
+
+Meaning:
+
+* Stack grows downward
+* SP points to last filled location
+
+---
+
+## 🔹 7. Special Case (IMPORTANT)
+
+### POP with PC
+
+```asm
+POP {R0, PC}
+```
+
+👉 Used to return from function
+
+---
+
+## 🔹 8. Register Restrictions
+
+* Only **R0–R7** allowed normally
+* Special registers:
+
+  * PUSH can include **LR**
+  * POP can include **PC**
+
+---
+
+## 🔹 9. Example (Step-by-Step)
+
+Assume:
+
+```asm
+SP = 1000
+R0 = 1
+R1 = 2
+```
+
+### PUSH
+
+```asm
+PUSH {R0, R1}
+```
+
+Result:
+
+| Address | Value |
+| ------- | ----- |
+| 996     | R1    |
+| 1000    | R0    |
+
+SP = 996
+
+---
+
+### POP
+
+```asm
+POP {R0, R1}
+```
+
+Result:
+
+* R0 = value from stack
+* SP increases
+
+---
+
+## 🔹 10. Key Points for Exam
+
+* Thumb uses PUSH/POP instead of LDM/STM
+* Uses SP (R13)
+* Stack type = Full Descending
+* PUSH → store, POP → load
+* POP {PC} used for return
+
+---
+
+## 🔹 11. Exam-Ready Summary
+
+Thumb stack instructions provide simplified stack operations using PUSH and POP. PUSH stores registers onto the stack, while POP retrieves them. These instructions internally map to STMDB and LDMIA instructions and use a full descending stack structure.
+
+---
+
